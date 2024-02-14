@@ -1,0 +1,50 @@
+name-template: 'Release $NEXT_PATCH_VERSION 🎉'
+tag-template: 'v$NEXT_PATCH_VERSION'
+categories:
+  - title: '✨ Nouvelles Fonctionnalités'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Corrections de Bugs'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '🛠 Améliorations Techniques'
+    labels:
+      - 'refactor'
+      - 'chore'
+  - title: '📚 Mise à Jour de la Documentation'
+    labels:
+      - 'docs'
+      - 'documentation'
+exclude-labels:
+  - 'skip-changelog'
+change-template: '- **$TITLE** par @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\"`'
+version-resolver:
+  major:
+    labels:
+      - 'breaking'
+  minor:
+    labels:
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'fix'
+      - 'bug'
+      - 'refactor'
+      - 'docs'
+  default: patch
+template: |
+  ## Quoi de Neuf dans cette Version?
+
+  Nous sommes ravis d'annoncer une nouvelle version de notre projet. Voici un résumé des modifications apportées :
+
+  $CHANGES
+  
+  ## 🙏 Remerciements
+
+  Un grand merci à tous nos contributeurs pour cette version :
+  
+  @$CONTRIBUTORS
