@@ -12,6 +12,12 @@ jobs:
         with:
           node-version: '20.x'
       - name: Install dependencies
-        run: yarn install
+        run: |
+          cd backend && yarn install
+#          cd frontend && yarn install
+#          cd mobile && yarn install
       - name: Run linter
-        run: echo "Run linter"
+        run: | 
+          cd backend && yarn lint
+#          cd frontend && yarn lint
+#          cd mobile && yarn lint

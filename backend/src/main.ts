@@ -5,4 +5,4 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await app.listen(8080);
 }
-bootstrap();
+bootstrap().then(() => console.log('NestJS server is running'));
