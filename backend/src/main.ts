@@ -6,7 +6,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bodyParser = require('body-parser');
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();

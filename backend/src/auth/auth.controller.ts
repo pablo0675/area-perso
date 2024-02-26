@@ -1,4 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
@@ -6,6 +12,9 @@ import {
   RegisterCredentialsDto,
 } from './dto/Credentials.dto';
 import LoginResultDto from './dto/credentialsResponse.dto';
+import { pipe } from 'fp-ts/function';
+import * as TE from 'fp-ts/TaskEither';
+import * as T from 'fp-ts/Task';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -14,7 +23,18 @@ export class AuthController {
   @ApiBody({ type: RegisterCredentialsDto })
   @Post('register')
   async register(@Body() registerCredentialsDto: RegisterCredentialsDto) {
-    return this.authService.register(registerCredentialsDto);
+    return pipe(
+      this.authService.register(registerCredentialsDto),
+      TE.fold(
+        (error: Error) =>
+          T.fromTask(() =>
+            Promise.reject(
+              new HttpException(error.message, HttpStatus.UNAUTHORIZED),
+            ),
+          ),
+        (user) => T.fromTask(() => Promise.resolve(user)),
+      ),
+    )();
   }
 
   @ApiBody({ type: LoginCredentialsDto })
@@ -27,7 +47,21 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() loginCredentialsDto: LoginCredentialsDto,
-  ): Promise<LoginResultDto> {
-    return this.authService.login(loginCredentialsDto);
+  ): Promise<LoginCredentialsDto> {
+    return pipe(
+      this.authService.login(loginCredentialsDto),
+      TE.fold(
+        (error: Error) =>
+          T.fromTask(() =>
+            Promise.reject(
+              new HttpException(error.message, HttpStatus.UNAUTHORIZED),
+            ),
+          ),
+        (token: string) =>
+          T.fromTask(() =>
+            Promise.resolve(token as unknown as LoginCredentialsDto),
+          ),
+      ),
+    )();
   }
 }

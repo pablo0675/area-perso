@@ -1,9 +1,8 @@
 import { Schema, model } from 'mongoose';
 import UserSetting from './user.setting';
-import argon2 from 'argon2';
+const argon2 = require('argon2');
 
 enum TokenType {
-  Area,
   Google,
   Facebook,
   Twitter,
@@ -17,15 +16,14 @@ enum TokenType {
   instagram,
 }
 
-class UserToken {
+export class UserToken {
   type: TokenType;
   token: string;
-  refreshToken: string;
+  refreshToken?: string;
   expiresAt: Date;
   createdAt: Date;
-  username: string;
-  email: string;
-  toLogin: boolean;
+  username?: string;
+  email?: string;
 }
 
 export class UserEntity {
@@ -37,7 +35,8 @@ export class UserEntity {
   createdAt!: Date;
   updatedAt!: Date;
   settings!: UserSetting[];
-  tokens?: UserToken[];
+  tokens: UserToken[];
+  accessToken?: string;
 }
 
 const UserSettingSchema = new Schema<UserSetting>({
@@ -53,25 +52,30 @@ const tokenTypeSchema = new Schema<UserToken>({
   createdAt: { type: Date, default: Date.now },
   username: { type: String, required: true },
   email: { type: String, required: true },
-  toLogin: { type: Boolean, default: false },
 });
 
-
-const userSchema = new Schema<UserEntity>({
-  id: { type: String, required: true, unique: true},
+export const userSchema = new Schema<UserEntity>({
+  id: { type: String, required: true, unique: true },
   username: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: false },
   picture: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  settings: { type: [UserSettingSchema], default: [] },
+  settings: { type: [UserSettingSchema] },
   tokens: { type: [tokenTypeSchema], default: [] },
+  accessToken: { type: String, required: false },
 });
 
 userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
-    this.password = await argon2.hash(this.password);
+    console.log('password modified');
+    try {
+      this.password = await argon2.hash(this.password);
+    } catch (error) {
+      console.error('yolo');
+      throw new Error(error);
+    }
   }
   next();
 });
