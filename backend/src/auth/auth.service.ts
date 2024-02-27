@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import argon2 from 'argon2';
 import { UserService } from '../user/user.service';
 import * as TE from 'fp-ts/TaskEither';
 import { pipe } from 'fp-ts/function';
@@ -8,6 +7,9 @@ import { UserEntity } from '../user/entities/user.entity';
 import { TaskEither } from 'fp-ts/TaskEither';
 import { LoginCredentialsDto } from './dto/Credentials.dto';
 import { JwtPayload } from './jwt-payload.interface';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const argon2 = require('argon2');
 
 @Injectable()
 export class AuthService {
@@ -38,7 +40,7 @@ export class AuthService {
     hash: string,
   ): TaskEither<Error, boolean> => {
     return TE.tryCatch(
-      () => argon2.verify(password, hash),
+      () => argon2.verify(hash, password),
       (reason) => new Error(String(reason)),
     );
   };

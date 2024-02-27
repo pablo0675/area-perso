@@ -5,7 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   LoginCredentialsDto,
@@ -63,5 +63,20 @@ export class AuthController {
           ),
       ),
     )();
+  }
+
+  @ApiBody({ type: String, description: 'The token to verify' })
+  @ApiOkResponse({
+    type: String,
+    description: 'The token is valid',
+    status: 200,
+  })
+  @Post('verify')
+  async verify(@Body() token: string) {
+    const result = await this.authService.verifyToken(token);
+    if (result === null) {
+      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+    }
+    return result;
   }
 }

@@ -3,7 +3,7 @@ import { UserModel, UserEntity, UserToken } from './entities/user.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as fpts from 'fp-ts';
-import UserUpdateDto from './dto/user.dto';
+import { UserUpdateDto } from './dto/user.dto';
 import * as TE from 'fp-ts/TaskEither';
 import { pipe } from 'fp-ts/function';
 import { v4 as uuidv4 } from 'uuid';
