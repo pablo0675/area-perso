@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 'backend/'
+    environment:
+      - PORT=${BACK_PORT}
+    ports:
+      - '${BACK_PORT}:${BACK_PORT}'
+    restart: always
+    depends_on:
+      - riot
+
+  riot:
+    build: 'services/riot/'
+    environment:
+      - PORT=${RIOT_PORT}
+    ports:
+      - '${RIOT_PORT}:${RIOT_PORT}'
+    restart: always
