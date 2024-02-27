@@ -38,10 +38,20 @@ export class AuthService {
   comparePassword = (
     password: string,
     hash: string,
-  ): TaskEither<Error, boolean> => {
-    return TE.tryCatch(
-      () => argon2.verify(hash, password),
-      (reason) => new Error(String(reason)),
+  ): TE.TaskEither<Error, void> => {
+    return pipe(
+      TE.tryCatch(
+        () => argon2.verify(hash, password),
+        (reason: string) =>
+          new Error(
+            `Technical error while verifying password : ${String(reason)}`,
+          ),
+      ),
+      TE.chain((isMatch) =>
+        isMatch
+          ? TE.right(undefined)
+          : TE.left(new Error('Wrong password provided')),
+      ),
     );
   };
 
@@ -59,20 +69,13 @@ export class AuthService {
   login(loginCredentialsDto: LoginCredentialsDto): TaskEither<Error, string> {
     return pipe(
       this.UserService.getUser({ email: loginCredentialsDto.email }),
-      TE.chain((userOrNull) =>
-        userOrNull
-          ? TE.right(userOrNull)
-          : TE.left(new Error('User not found')),
-      ),
       TE.chain((user) =>
         pipe(
           this.comparePassword(
             loginCredentialsDto.password,
             user.password || '',
           ),
-          TE.chain((isMatch) =>
-            isMatch ? TE.right(user) : TE.left(new Error('Invalid password')),
-          ),
+          TE.map(() => user),
         ),
       ),
       TE.map((user) => this.generateToken(user.id)),

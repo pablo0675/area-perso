@@ -14,8 +14,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
-    .setTitle('LIFE COUNTER')
-    .setDescription('API for LIFE COUNTER project')
+    .setTitle('AREA 51')
+    .setDescription('AREA 51 API documentation')
     .setVersion('1.0')
     .build();
 
