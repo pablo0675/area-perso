@@ -4,7 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './jwt-payload.interface';
 import { ConfigService } from '@nestjs/config';
-import { UserModel } from '../user/entities/user.entity';
+import { pipe } from 'fp-ts/function';
+import * as fpts from 'fp-ts';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -23,10 +24,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<any> {
-    const user = await UserModel.findOne({ email: payload.mail });
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    return user;
+    return pipe(
+      this.usersService.getUser({ id: payload.id }),
+      fpts.taskEither.match(
+        (error) => {
+          return new UnauthorizedException(error.message);
+        },
+        (user) => {
+          if (user === null) {
+            return new UnauthorizedException('User not found');
+          } else {
+            return user;
+          }
+        },
+      ),
+    );
   }
 }

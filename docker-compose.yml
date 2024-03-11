@@ -9,6 +9,18 @@ services:
       - '${BACK_PORT}:${BACK_PORT}'
     restart: always
     depends_on:
+      - database
+      - supervisor
+      - riot
+
+  supervisor:
+    build: 'services/supervisor/'
+    environment:
+      - PORT=${SUPERVISOR_PORT}
+    ports:
+      - '${SUPERVISOR_PORT}:${SUPERVISOR_PORT}'
+    restart: always
+    depends_on:
       - riot
 
   riot:
@@ -18,3 +30,14 @@ services:
     ports:
       - '${RIOT_PORT}:${RIOT_PORT}'
     restart: always
+
+  database:
+    image: postgres:16.0-alpine3.18
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - '${DB_PORT}:5432'
+    restart: always
+

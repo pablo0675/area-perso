@@ -4,6 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { DATA_SOURCE_CONFIGURATION } from './database';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,12 +20,13 @@ import { AboutModule } from './about/about.module';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
-    MongooseModule.forRootAsync({
+ /*   MongooseModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_URI'),
       }),
       inject: [ConfigService],
-    }),
+    }),*/
+    TypeOrmModule.forRoot(DATA_SOURCE_CONFIGURATION),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({

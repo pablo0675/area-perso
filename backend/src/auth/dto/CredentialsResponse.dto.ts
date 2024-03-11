@@ -8,4 +8,9 @@ export default class LoginResultDto {
   })
   @IsJWT()
   accessToken!: string;
+
+  @ApiProperty({
+    description: 'The user id',
+  })
+  userId!: string;
 }

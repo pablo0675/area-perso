@@ -66,7 +66,7 @@ export class AuthService {
       return null;
     }
   }
-  login(loginCredentialsDto: LoginCredentialsDto): TaskEither<Error, string> {
+  login(loginCredentialsDto: LoginCredentialsDto): TaskEither<Error, string[]> {
     return pipe(
       this.UserService.getUser({ email: loginCredentialsDto.email }),
       TE.chain((user) =>
@@ -78,7 +78,7 @@ export class AuthService {
           TE.map(() => user),
         ),
       ),
-      TE.map((user) => this.generateToken(user.id)),
+      TE.map((user) => [this.generateToken(user.id), user.id]),
     );
   }
 }

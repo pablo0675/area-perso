@@ -57,7 +57,7 @@ export class AuthController {
               new HttpException(error.message, HttpStatus.UNAUTHORIZED),
             ),
           ),
-        (token: string) =>
+        (token: string[]) =>
           T.fromTask(() =>
             Promise.resolve(token as unknown as LoginCredentialsDto),
           ),

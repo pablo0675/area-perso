@@ -1,3 +1,6 @@
+import { Column, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { UserEntity } from './user.entity';
+
 export enum Theme {
   Light,
   Dark,
@@ -11,7 +14,19 @@ export enum Language {
   Default = English,
 }
 
-export default class UserSetting {
-  theme: Theme = Theme.Default;
-  language: Language = Language.Default;
+export default class UserSettings {
+  @Column({ type: 'enum', enum: Theme, default: Theme.Default })
+  theme: Theme;
+
+  @Column({ type: 'enum', enum: Language, default: Language.Default })
+  language: Language;
+
+  @PrimaryColumn()
+  userId!: string;
+  @OneToOne(() => UserEntity, (user) => user.settings, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'user_id' })
+  user!: UserEntity;
 }
