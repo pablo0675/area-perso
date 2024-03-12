@@ -1,9 +1,8 @@
 import { configDotenv } from 'dotenv';
-import * as process from 'process';
 
 configDotenv();
 
-export function getFromEnvironment<T>(
+export function getFromEnv<T>(
   key: string,
   throwIfNotFound: boolean = true,
 ): T | undefined {

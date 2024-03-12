@@ -1,5 +1,3 @@
-import { Language, Theme } from '../entities/user.setting';
-
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -34,10 +32,10 @@ class TokenDto {
 
 class UserSettingDto {
   @ApiProperty({ example: 0 })
-  theme: Theme;
+  theme: number;
 
   @ApiProperty({ example: 0 })
-  language: Language;
+  language: number;
 }
 
 export class UserUpdateDto {

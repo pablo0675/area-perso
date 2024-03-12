@@ -8,12 +8,12 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { TokenType } from '../../types/user.token.types';
-import { UserEntity } from './user.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class UserToken {
   @PrimaryGeneratedColumn()
-  id: number;
+  tokenId: number;
 
   @Column({
     type: 'enum',
@@ -41,10 +41,10 @@ export class UserToken {
 
   @PrimaryColumn()
   userId!: string;
-  @ManyToOne(() => UserEntity, (user) => user.tokens, {
+  @ManyToOne(() => User, (user) => user.tokens, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'user_id' })
-  user!: UserEntity;
+  user!: User;
 }

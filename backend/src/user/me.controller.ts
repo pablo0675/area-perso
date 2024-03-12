@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Post, Query, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserUpdateDto } from './dto/user.dto';
+import { Response } from 'express';
 import { pipe } from 'fp-ts/function';
-import * as fpts from 'fp-ts';
-import { Task } from 'fp-ts/Task';
-import { UserEntity } from './entities/user.entity';
+import * as TE from 'fp-ts/TaskEither';
+import * as T from 'fp-ts/Task';
+import { User } from './entities/user.entity';
 
 @ApiTags('me')
 @Controller('me')
@@ -16,26 +17,21 @@ export class MeController {
   @ApiOkResponse({ type: String, description: 'success', status: 200 })
   @Post('update')
   async update(
-    @Res() res,
+    @Res() res: Response,
     @Body() userUpdateDto: UserUpdateDto,
-  ): Promise<Task<Error | string>> {
-    const either = this.UserService.updateUser(userUpdateDto, userUpdateDto.id);
-
+  ): Promise<Response> {
     return pipe(
-      either,
-      fpts.taskEither.match(
-        (error) => {
-          return error;
-        },
-        (user) => {
-          if (user === null) {
-            return new Error('User not found');
-          } else {
-            return res.status(200).send({ message: 'success' });
-          }
-        },
+      this.UserService.updateUser(userUpdateDto, userUpdateDto.id),
+      TE.fold(
+        (error: Error) =>
+          T.fromTask(() =>
+            Promise.reject(
+              new HttpException(error.message, HttpStatus.UNAUTHORIZED),
+            ),
+          ),
+        (user) => T.fromTask(() => Promise.resolve(res.status(200).send({ message: 'success' }))),
       ),
-    );
+    )();
   }
 
   @ApiOkResponse({ type: String, description: 'success', status: 200 })
@@ -44,52 +40,46 @@ export class MeController {
     description: "the user's id",
   })
   @Delete('delete')
-  async delete(@Res() res, @Body() id: string): Promise<Task<Error | string>> {
-    const either = this.UserService.deleteUser({ id });
+  async delete(
+    @Res() res: Response,
+    @Query('id') id: string,
+  ): Promise<Response> {
 
     return pipe(
-      either,
-      fpts.taskEither.match(
-        (error) => {
-          return error;
-        },
-        (user) => {
-          if (user === null) {
-            return new Error('User not found');
-          } else {
-            return res.status(200).send({ message: 'success' });
-          }
-        },
+      this.UserService.deleteUser({ id }),
+      TE.fold(
+        (error: Error) =>
+          T.fromTask(() =>
+            Promise.reject(
+              new HttpException(error.message, HttpStatus.UNAUTHORIZED),
+            ),
+          ),
+        (user) => T.fromTask(() => Promise.resolve(res.status(200).send({ message: 'success' }))),
       ),
-    );
+    )();
   }
 
   @ApiBody({
     type: 'String',
     description: "the user's email",
   })
-  @ApiOkResponse({ type: UserEntity, status: 200 })
+  @ApiOkResponse({ type: User, status: 200 })
   @Get('get')
   async get(
-    @Res() res,
-    @Body() email: string,
-  ): Promise<Task<Error | UserEntity>> {
-    const either = this.UserService.getUser({ email });
-
+    @Res() res: Response,
+    @Query('id') id: string,
+  ): Promise<Response> {
     return pipe(
-      either,
-      fpts.taskEither.match(
-        (error) => {
-          return error;
-        },
-        (user) => {
-          if (user === null) {
-            return new Error('User not found');
-          } else {
-            return res.status(200).send(user);
-          }
-        },
+      this.UserService.getUser({ id }),
+      TE.fold(
+        (error: Error) =>
+          T.fromTask(() =>
+            Promise.reject(
+              new HttpException(error.message, HttpStatus.UNAUTHORIZED),
+            ),
+          ),
+        (user) => T.fromTask(() => Promise.resolve(res.status(200).send(user))),
       ),
-    );
+    )();
   }
 }

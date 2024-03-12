@@ -2,16 +2,14 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
   OneToOne,
 } from 'typeorm';
-import UserSetting from './user.setting';
-import { UserToken } from './user.token';
+import { UserSettings } from './user-setting.entity';
+import { UserToken } from './user-token.entity';
 
 @Entity()
-export class UserEntity {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -22,29 +20,21 @@ export class UserEntity {
   email!: string;
 
   @Column({ nullable: true })
-  password!: string | null;
+  password?: string;
 
   @Column({ nullable: true })
-  picture!: string | null;
+  picture?: string;
 
-  @CreateDateColumn()
-  createdAt!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
-
-  @OneToOne(() => UserSetting, (setting) => setting.user, {
+  @OneToOne(() => UserSettings, (settings) => settings.user, {
     cascade: true,
-    onDelete: 'CASCADE',
+    nullable: false,
   })
-  settings!: UserSetting[];
+  settings!: UserSettings;
 
   @OneToMany(() => UserToken, (token) => token.user, {
     cascade: true,
-    onDelete: 'CASCADE',
+    nullable: true,
   })
   tokens: UserToken[];
-
-  @Column({ nullable: true })
-  accessToken?: string;
 }

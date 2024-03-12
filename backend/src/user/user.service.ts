@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity';
-import { UserToken } from './entities/user.token';
+import { User } from './entities/user.entity';
+import { UserToken } from './entities/user-token.entity';
 import * as fpts from 'fp-ts';
 import { UserUpdateDto } from './dto/user.dto';
 import * as TE from 'fp-ts/TaskEither';
@@ -9,23 +9,24 @@ import { pipe } from 'fp-ts/function';
 import { v4 as uuidv4 } from 'uuid';
 import { DeleteResult, Repository } from 'typeorm';
 import { hash } from 'argon2';
+import { RegisterCredentialsDto } from '../auth/dto/Credentials.dto';
 
 type UserIdentification = { id: string } | { email: string };
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   getUser(
     options: UserIdentification,
-  ): fpts.taskEither.TaskEither<Error, UserEntity> {
+  ): fpts.taskEither.TaskEither<Error, User> {
     return fpts.taskEither.tryCatch(
       async () => {
         const user = await this.userRepository.findOne({ where: options });
         if (user === null) {
-          throw new Error('User not found');
+          throw new Error('UserEntity not found');
         }
         return user;
       },
@@ -35,27 +36,27 @@ export class UserService {
     );
   }
 
-  async storeToken(token: UserToken, id: string): Promise<UserEntity> {
+  async storeToken(token: UserToken, id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: id },
       relations: ['tokens'],
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('UserEntity not found');
     }
     const existingTokenIndex = user.tokens.findIndex(
       (t) => t.type === token.type,
     );
-
     if (existingTokenIndex > -1) {
       user.tokens[existingTokenIndex] = token;
     } else {
       user.tokens.push(token);
     }
-
-    await this.userRepository.save(user);
-
+    const savedUser = await this.userRepository.save(user);
+    if (savedUser === null) {
+      throw new Error('UserEntity not saved');
+    }
     return user;
   }
 
@@ -66,20 +67,31 @@ export class UserService {
     );
   }
 
-  createUser(userDto: UserEntity): TE.TaskEither<Error, UserEntity> {
-    const createdAt = new Date();
-    const updatedAt = new Date();
+  createUser(userDto: RegisterCredentialsDto): TE.TaskEither<Error, User> {
     const id = uuidv4();
     const user = this.userRepository.create({
-      ...userDto,
-      id,
-      createdAt,
-      updatedAt,
+      id: id,
+      username: userDto.username,
+      email: userDto.email,
+      password: userDto.password,
+      settings: {
+        userId: id,
+        theme: "auto",
+        language: "English",
+      },
+      tokens: []
     });
+
     return TE.tryCatch(
       async () => {
-        user.password = await hash(user.password);
+        if (user && user.password) user.password = await hash(user.password);
+        if (user.password === null) {
+          throw new Error('Password not hashed');
+        }
         const savedUser = await this.userRepository.save(user);
+        if (savedUser === null) {
+          throw new Error('UserEntity not saved');
+        }
         return savedUser;
       },
       (error: unknown) => new Error(String(error)),
@@ -89,17 +101,21 @@ export class UserService {
   updateUser(
     user: UserUpdateDto,
     id: string,
-  ): fpts.taskEither.TaskEither<Error, UserEntity> {
+  ): fpts.taskEither.TaskEither<Error, User> {
     return fpts.taskEither.tryCatch(
       async () => {
         const updatedUser = await this.userRepository.findOne({
           where: { id },
         });
         if (updatedUser === null) {
-          throw new Error('User not found');
+          throw new Error('UserEntity not found');
         }
         Object.assign(updatedUser, user);
-        await this.userRepository.save(updatedUser);
+        const savedUser = await this.userRepository.save(updatedUser);
+        if (savedUser === null) {
+          throw new Error('UserEntity not saved');
+        }
+
         return updatedUser;
       },
       (error: string) => {

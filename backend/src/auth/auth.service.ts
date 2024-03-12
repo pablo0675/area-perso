@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as TE from 'fp-ts/TaskEither';
 import { pipe } from 'fp-ts/function';
-import { UserEntity } from '../user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
 import { TaskEither } from 'fp-ts/TaskEither';
 import { LoginCredentialsDto } from './dto/Credentials.dto';
 import { JwtPayload } from './jwt-payload.interface';
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  register(registerCredentialsDto: any): TE.TaskEither<Error, UserEntity> {
+  register(registerCredentialsDto: any): TE.TaskEither<Error, User> {
     return pipe(
       this.UserService.getUser({
         email: registerCredentialsDto.email,
@@ -30,7 +30,7 @@ export class AuthService {
           }
           return TE.left(error);
         },
-        () => TE.left(new Error('User already exists')),
+        () => TE.left(new Error('UserEntity already exists')),
       ),
     );
   }
@@ -59,9 +59,9 @@ export class AuthService {
     return this.jwtService.sign({ id: id });
   }
 
-  async verifyToken(token: string): Promise<JwtPayload | null> {
+  async verifyToken(token: string): Promise<null | JwtPayload> {
     try {
-      return this.jwtService.verify(token);
+      return this.jwtService.verify(token) as JwtPayload;
     } catch {
       return null;
     }

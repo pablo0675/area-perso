@@ -11,7 +11,7 @@ import {
   LoginCredentialsDto,
   RegisterCredentialsDto,
 } from './dto/Credentials.dto';
-import LoginResultDto from './dto/credentialsResponse.dto';
+import LoginResultDto from './dto/CredentialsResponse.dto';
 import { pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/TaskEither';
 import * as T from 'fp-ts/Task';
