@@ -5,10 +5,9 @@ import { MeController } from './me.controller';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { UserSettings } from './entities/user-setting.entity';
-import { UserToken } from './entities/user-token.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, UserSettings, UserToken])],
+  imports: [TypeOrmModule.forFeature([User, UserSettings])],
   controllers: [MeController],
   providers: [UserService],
   exports: [UserService],

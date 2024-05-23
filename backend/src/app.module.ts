@@ -7,6 +7,13 @@ import { DATABASE_CONFIG } from './database';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { AboutModule } from './about/about.module';
+import { WorkflowController } from './workflow/workflow.controller';
+import { WorkflowService } from './workflow/workflow.service';
+import { WorkflowModule } from './workflow/workflow.module';
+import { ServiceModule } from './service/service.module';
+import { UserConnectionsService } from './user-connections/user-connections.service';
+import { UserConnectionsController } from './user-connections/user-connections.controller';
+import { UserConnectionsModule } from './user-connections/user-connections.module';
 
 @Module({
   imports: [
@@ -17,7 +24,11 @@ import { AboutModule } from './about/about.module';
     AuthModule,
     UserModule,
     AboutModule,
+    WorkflowModule,
+    ServiceModule,
+    UserConnectionsModule,
   ],
-  controllers: [],
+  controllers: [WorkflowController, UserConnectionsController],
+  providers: [WorkflowService, UserConnectionsService],
 })
 export class AppModule {}

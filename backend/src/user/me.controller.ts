@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserUpdateDto } from './dto/user.dto';
@@ -29,7 +39,10 @@ export class MeController {
               new HttpException(error.message, HttpStatus.UNAUTHORIZED),
             ),
           ),
-        (user) => T.fromTask(() => Promise.resolve(res.status(200).send({ message: 'success' }))),
+        () =>
+          T.fromTask(() =>
+            Promise.resolve(res.status(200).send({ message: 'success' })),
+          ),
       ),
     )();
   }
@@ -44,7 +57,6 @@ export class MeController {
     @Res() res: Response,
     @Query('id') id: string,
   ): Promise<Response> {
-
     return pipe(
       this.UserService.deleteUser({ id }),
       TE.fold(
@@ -54,7 +66,10 @@ export class MeController {
               new HttpException(error.message, HttpStatus.UNAUTHORIZED),
             ),
           ),
-        (user) => T.fromTask(() => Promise.resolve(res.status(200).send({ message: 'success' }))),
+        () =>
+          T.fromTask(() =>
+            Promise.resolve(res.status(200).send({ message: 'success' })),
+          ),
       ),
     )();
   }
@@ -65,10 +80,7 @@ export class MeController {
   })
   @ApiOkResponse({ type: User, status: 200 })
   @Get('get')
-  async get(
-    @Res() res: Response,
-    @Query('id') id: string,
-  ): Promise<Response> {
+  async get(@Res() res: Response, @Query('id') id: string): Promise<Response> {
     return pipe(
       this.UserService.getUser({ id }),
       TE.fold(

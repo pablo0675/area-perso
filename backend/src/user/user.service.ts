@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { UserToken } from './entities/user-token.entity';
 import * as fpts from 'fp-ts';
 import { UserUpdateDto } from './dto/user.dto';
 import * as TE from 'fp-ts/TaskEither';
@@ -36,30 +35,6 @@ export class UserService {
     );
   }
 
-  async storeToken(token: UserToken, id: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id: id },
-      relations: ['tokens'],
-    });
-
-    if (!user) {
-      throw new Error('UserEntity not found');
-    }
-    const existingTokenIndex = user.tokens.findIndex(
-      (t) => t.type === token.type,
-    );
-    if (existingTokenIndex > -1) {
-      user.tokens[existingTokenIndex] = token;
-    } else {
-      user.tokens.push(token);
-    }
-    const savedUser = await this.userRepository.save(user);
-    if (savedUser === null) {
-      throw new Error('UserEntity not saved');
-    }
-    return user;
-  }
-
   checkExistingUser(options: { email: string }): TE.TaskEither<Error, boolean> {
     return pipe(
       this.getUser(options),
@@ -76,10 +51,9 @@ export class UserService {
       password: userDto.password,
       settings: {
         userId: id,
-        theme: "auto",
-        language: "English",
+        theme: 'auto',
+        language: 'English',
       },
-      tokens: []
     });
 
     return TE.tryCatch(
